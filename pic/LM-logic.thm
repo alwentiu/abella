@@ -1,0 +1,42 @@
+% An intuitionistic version of Milner-Parrow-Walker's modal logic LM
+% Ki Yung Ahn, Alwen Tiu
+
+Specification "finite-pic".
+
+
+Kind o'                  type.
+Type tt, ff              o'.
+Type conj, disj, impl    o' -> o' -> o'.
+Type mat                 n -> n -> o'.
+Type boxAct, diaAct      a -> o' -> o'.
+Type boxOut, diaOut,
+     boxInL, diaInL,
+     boxIn, diaIn      n -> (n -> o') -> o'.
+
+Define satLM : p -> o' -> prop
+by satLM P ff := false
+ ; satLM P tt := true
+ ; satLM P (conj A B) := satLM P A /\ satLM P B
+ ; satLM P (disj A B) := satLM P A \/ satLM P B
+ ; satLM P (impl A B) := satLM P A -> satLM P B  % non-stratified clause
+ ; satLM P (mat X X)
+ ; satLM P (boxAct X A) := forall P1, {one P X P1} -> satLM P1 A
+ ; satLM P (diaAct X A) := exists P1, {one P X P1} /\ satLM P1 A
+ ; satLM P (boxOut X A) := forall Q, {oneb P (up X) Q} -> nabla w, satLM (Q w) (A w)
+ ; satLM P (diaOut X A) := exists Q, {oneb P (up X) Q} /\ nabla w, satLM (Q w) (A w)
+ ; satLM P (boxIn X A) := forall Q, {oneb P (dn X) Q} -> forall w, satLM (Q w) (A w)
+ ; satLM P (diaIn X A) := exists Q, {oneb P (dn X) Q} /\ forall w, satLM (Q w) (A w)
+ ; satLM P (boxInL X A) := forall Q, {oneb P (dn X) Q} -> exists w, satLM (Q w) (A w)
+ .
+   
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% triple negation example
+%%%%%%%%%%%%%%%%%%%%%%%
+Theorem trinegexample: forall a,
+satLM (plus (in a x\taup null) (in a x\null))   
+      (boxInL a x\ disj (conj (mat x a) (boxAct tau ff)) (diaAct tau (impl (impl (impl (mat x a) ff) ff) ff))).
+intros. unfold. intros. case H1.
+case H2. exists n1. unfold. right. unfold. exists null. split. search.
+  unfold. intros. case H3. backchain H4. unfold. intros. case H5.
+case H2. exists a. unfold. left. unfold. search. unfold. intros. case H3. 

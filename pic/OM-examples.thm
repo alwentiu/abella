@@ -1,0 +1,213 @@
+% Some examples related to modal logic OM
+% Ki Yung Ahn, Alwen Tiu
+
+Specification "finite-pic".
+Import "OM-logic".
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Example judgement that is necessary and suffficient
+%% to the Excluded Middle over names 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Theorem excl_middle1 : forall x y,
+sat (plus (taup null) (taup (taup null)))
+    (impl (diaAct tau (conj (boxAct tau (mat x y))
+                      (impl (mat x y) (diaAct tau tt))))
+          (disj (mat x y) (impl (mat x y) ff)) ).
+intros. unfold. intros. case H1. unfold. case H3. case H4. case H5. case H2.
+case H8. right. unfold. intros. case H9. apply H7 to _. case H10. case H11. 
+case H8. left. apply H6 to _. case H9. search.
+
+Theorem excl_middle2 : forall x y,
+sat (plus (taup null) (taup (taup null)))
+    (impl (disj (mat x y) (impl (mat x y) ff))
+          (diaAct tau (conj (boxAct tau (mat x y))
+                            (impl (mat x y) (diaAct tau tt)) ) ) ).
+intros. unfold. intros. case H1. case H2.
+case H3. unfold. exists taup null. split. search.
+   unfold. search. unfold. intros. search.
+case H3. unfold. exists null. split. search.
+   unfold.
+     unfold. intros. case H5.
+     unfold. intros. case H5. apply H4 to _. case H6.
+		     
+Theorem excl_middle3: forall x y,
+sat (plus (taup null) (plus (taup (taup null)) (taup (match x y (taup null)))))
+      (impl (disj (mat x y) (impl (mat x y) ff)) (boxAct tau (disj (diaAct tau tt) (boxAct tau ff)))).
+intros. unfold. intros.
+       case H1.
+       case H2.
+       case H3.
+       unfold.
+       intros.
+       case H4.
+       case H5.
+       unfold.
+       right.
+       unfold.
+       intros.
+       case H6.
+
+       case H5.
+       case H6.
+       unfold.
+       left.
+       search.
+       case H6.
+       unfold.
+       left.
+       unfold.
+       exists null.
+       search.
+
+       unfold.       
+       intros.
+       case H4.
+       case H5.
+       unfold.
+       right.
+       unfold.
+       intros.
+       case H6.
+       case H5.
+       case H6.
+       search.
+       case H6.
+       unfold.
+       right.
+       unfold.
+       intros.
+       case H7.
+       case H8.
+       case H3.
+       apply H9 to _.
+       case H10.
+       %qed
+
+Theorem excl_middle4: forall x y,
+sat (plus (taup null) (plus (taup (taup null)) (taup (match x y (taup null)))))
+      (impl (boxAct tau (disj (diaAct tau tt) (boxAct tau ff))) (disj (mat x y) (impl (mat x y) ff))).
+       intros.
+       unfold.
+       intros.
+       unfold.
+       case H1.
+       apply H2 to _ with P1 = (match x y (taup null)).
+       case H3.
+       case H4.
+       case H5.
+       case H6.
+       left.
+       case H8.
+       search.
+       case H5.
+       right.
+       unfold.
+       intros.
+       case H7.
+       apply H6 to _.
+       case H8.
+       %qed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% reviewing new examples
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+Theorem newxamplenolawex : forall a, 
+sat (nu k\out a k (in a x\ plus (plus (taup null) (taup (taup null))) (taup (match x k (taup null)))))
+    (diaOut a k\ diaIn a x\ diaAct tau (conj (impl (mat x k) (diaAct tau tt)) (boxAct tau (mat x k)))).
+intros. unfold.
+exists k\in a x\plus (plus (taup null) (taup (taup null))) (taup (match x k (taup null))).
+split. search.
+intros. unfold.
+exists x\plus (plus (taup null) (taup (taup null))) (taup (match x n1 (taup null))).
+split. search.
+intros. unfold. exists (match (w n1) n1 (taup null)).
+split. search. unfold.
+unfold. intros. case H1. search.
+unfold. intros. case H1. search.
+
+%%%% p. 61
+% P = plus (plus (in a x\null) (in a x\plus (in a y\null) (in a y\taup null)))
+%          (in a x\ match x v (plus (plus (in a y\null) (in a y\taup null))
+%                                   (in a y\ match y w (taup null))))
+% Q = P + (in a x\ match x v (plus (in a y\null) (a y\taup null)))
+
+Theorem newexample61P : forall a v w,
+sat (plus (plus (in a x\null) (in a x\plus (in a y\null) (in a y\taup null)))
+          (in a x\ match x v (plus (plus (in a y\null) (in a y\taup null))
+                                   (in a y\ match y w (taup null)))))
+    (boxIn a x\ (disj (disj (boxIn a x\ff) (diaIn a y\tt))
+                      (impl (mat x v) (diaIn a y\ conj (impl (mat y w) (diaAct tau tt))
+                                                       (boxAct tau (mat y w)))))).
+intros. unfold.
+exists x\ match x v (plus (plus (in a y\null) (in a (y\taup null)))
+                          (in a (y\match y w (taup null)))).
+intros. case H1.
+case H2.
+  case H3. unfold. left. unfold. left. unfold. intros. case H4.
+  case H3. unfold. left. unfold. right. unfold.
+    exists y\taup null. split. search. intros. search.
+case H2. unfold. right. unfold. intros. case H3. unfold.
+  exists y\match y w (taup null). split. search. intros. unfold.
+    unfold. intros. case H4. search. unfold. intros. case H4. search.
+
+Theorem newexample61Q : forall a v w,		       
+sat (plus (plus (plus (in a x\null) (in a x\plus (in a y\null) (in a y\taup null)))
+                (in a x\ match x v (plus (plus (in a y\null) (in a y\taup null))
+                                         (in a y\ match y w (taup null))))) 
+	  (in a x\ match x v (plus (in a y\null) (in a y\taup null))) )	   
+    (diaIn a x\ conj (conj (impl (mat x v) (diaIn a y\tt)) (boxIn a y\mat x v))
+                     (boxIn a y\disj (diaAct tau tt) (boxAct tau ff))).
+intros. unfold. exists x\match x v (plus (in a y\null) (in a y\taup null)). split. search.
+intros. unfold.
+  unfold. unfold. intros. case H1. search. unfold. intros. case H1. search.
+  unfold. intros. case H1. case H2.
+    case H3. unfold. right. unfold. intros. case H4.
+    case H3. unfold. left. unfold. search.
+
+
+Theorem newexample443 : forall x y,
+  sat (taup (match x y (taup null)))
+      (impl (mat x y) (boxAct tau (diaAct tau tt))).
+intros. unfold. intros. case H1. unfold. intros. case H2. search.
+
+
+% P = plus (plus (taup null) (taup (plus (taup (taup null)) (taup null))))
+%          (taup (match x y (plus (taup (match u v (taup null))) (plus (taup (taup null)) (taup null)))))
+% Q = P + (taup (math x y) (plus (taup (taup null)) (taup null)))    
+Theorem newexample444Q : forall x y u v,
+  sat (plus
+        (plus (plus (taup null) (taup (plus (taup (taup null)) (taup null))))
+              (taup (match x y (plus (taup (match u v (taup null)))
+                                     (plus (taup (taup null)) (taup null))))))
+        (taup (match x y (plus (taup (taup null)) (taup null)))))
+      (diaAct tau (conj (impl (mat x y) (diaAct tau tt))
+                  (conj (boxAct tau (mat x y))
+	                (boxAct tau (disj (diaAct tau tt) (boxAct tau ff)))) ) ).
+intros. unfold.
+exists (match x y (plus (taup (taup null)) (taup null))).
+split. search.
+unfold.
+unfold. intros. case H1. search.
+unfold.
+unfold. intros. case H1. search.
+unfold. intros. case H1. case H2.
+  case H3. search.			 
+  case H3. unfold. right. unfold. intros. case H4.
+
+Theorem newexample444P : forall x y u v,
+  sat (plus (plus (taup null) (taup (plus (taup (taup null)) (taup null))))
+            (taup (match x y (plus (taup (match u v (taup null)))
+                                   (plus (taup (taup null)) (taup null))))))
+      (boxAct tau (disj (disj (diaAct tau tt) (boxAct tau ff))
+                              (impl (mat x y) (diaAct tau (conj (impl (mat u v) (diaAct tau tt))
+	                                                        (boxAct tau (mat u v))))))).
+intros. unfold. intros. case H1.
+case H2.
+  case H3. unfold. left. unfold. right. unfold. intros. case H4.
+  case H3. unfold. left. unfold. left. search. 
+case H2. unfold. right. unfold. intros. case H3. unfold.
+  exists match u v (taup null). split. search. unfold.
+    unfold. intros. case H4. search.
+    unfold. intros. case H4. search.								 

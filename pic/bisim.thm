@@ -1,0 +1,18 @@
+% Definition of (open) bisimulation
+
+Specification "finite-pic".
+Set subgoals off.
+
+CoDefine bisim : p -> p -> prop by
+  bisim P Q :=
+    (forall A P1, {one P A P1} -> exists Q1, {one Q A Q1} /\ bisim P1 Q1) /\
+    (forall X M, {oneb P (dn X) M} -> exists N, {oneb Q (dn X) N} /\
+                                                forall W, bisim (M W) (N W)) /\
+    (forall X M, {oneb P (up X) M} -> exists N, {oneb Q (up X) N} /\
+                                                nabla w, bisim (M w) (N w)) /\
+    (forall A Q1, {one Q A Q1} -> exists P1, {one P A P1} /\ bisim Q1 P1) /\
+    (forall X N, {oneb Q (dn X) N} -> exists M, {oneb P (dn X) M} /\
+                                                forall W, bisim (N W) (M W)) /\
+    (forall X N, {oneb Q (up X) N} -> exists M, {oneb P (up X) M} /\
+                                                nabla w, bisim (N w) (M w)).
+

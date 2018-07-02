@@ -1,0 +1,339 @@
+% Soundness proof of open bisimilarity w.r.t. modal logic OM
+% Ki Yung Ahn, Alwen Tiu
+%
+
+Specification "finite-pic".
+Import "bisim".
+
+Set subgoals off.
+
+Kind o'                  type.
+Type tt, ff              o'.
+Type conj, disj, impl    o' -> o' -> o'.
+Type mat                 n -> n -> o'.
+Type boxAct, diaAct      a -> o' -> o'.
+Type boxOut, diaOut,
+     boxInL, diaInL,
+     boxIn, diaIn      n -> (n -> o') -> o'.
+
+   
+Define form : o' -> prop
+     by form tt
+     ; form ff
+     ; form (conj A B) := form A /\ form B
+     ; form (disj A B) := form A /\ form B
+     ; form (impl A B) := form A /\ form B
+     ; form (mat X Y)
+     ; form (boxAct X A) := form A
+     ; form (diaAct X A) := form A
+     ; form (boxOut X A) := forall w, form (A w)
+     ; form (diaOut X A) := forall w, form (A w)
+     ; form (boxIn X A) := forall w, form (A w)
+     ; form (diaIn X A) := forall w, form (A w)
+     .
+
+
+% The definition of sat is not stratified but it is well-founded (the formula size is decreasing).
+% See [Tiu, IJCAR 2012] for soundness criteria for non-stratified definitions.
+% Note however one cannot induct on the predicate sat directly. Instead always use induction
+% on the structure of the formula (predicate form) when proving properties of sat.     
+
+Define sat : p -> o' -> prop
+by sat P ff := false
+ ; sat P tt := true
+ ; sat P (conj A B) := sat P A /\ sat P B
+ ; sat P (disj A B) := sat P A \/ sat P B
+ ; sat P (impl A B) := sat P A -> sat P B  % non-stratified clause
+ ; sat P (mat X X)
+ ; sat P (boxAct X A) := forall P1, {one P X P1} -> sat P1 A
+ ; sat P (diaAct X A) := exists P1, {one P X P1} /\ sat P1 A
+ ; sat P (boxOut X A) := forall Q, {oneb P (up X) Q} -> nabla w, sat (Q w) (A w)
+ ; sat P (diaOut X A) := exists Q, {oneb P (up X) Q} /\ nabla w, sat (Q w) (A w)
+ ; sat P (boxIn X A) := forall Q, {oneb P (dn X) Q} -> forall w, sat (Q w) (A w)
+ ; sat P (diaIn X A) := exists Q, {oneb P (dn X) Q} /\ forall w, sat (Q w) (A w)
+ .
+
+				     
+Theorem bisim_sat : forall P Q F, form F -> bisim P Q ->
+    (sat P F -> sat Q F) /\ (sat Q F -> sat P F).
+% Proof.
+      induction on 1.
+      intros.
+
+      case H1. % case analysis
+
+% subgoal 1: tt    
+      split.
+    
+      intros.
+      search.
+      search.
+
+% subgoal 2: ff    
+      split.
+      intros.
+      case H3.
+      intros.
+      case H3.
+
+% subgoal 3: conj A B   
+      apply IH to H3 H2.
+     apply IH to H4 H2.
+     split.
+  
+     % sat P (conj A B) -> sat Q (conj A B)
+     intros.   
+     case H9.
+     apply H5 to H10.
+     apply H7 to H11.
+     search.
+     % sat Q (conj A B) -> sat P (conj A B)
+     intros.
+     case H9.
+     apply H6 to H10.
+     apply H8 to H11.
+     search.
+
+% subgoal 4: disj A B   
+     split.
+
+     % sat P (disj A B) -> sat Q (disj A B)   
+     intros.
+     apply IH to H3 H2.
+     case H5.
+     case H8.
+     apply H6 to H9.
+     search.
+     apply IH to H4 H2.
+     apply H10 to H9.
+     search.
+
+     % sat Q (disj A B) -> sat P (disj A B)
+     intros.
+     case H5.
+     case H6.
+     apply IH to H3 H2.
+     apply H9 to H7.
+     search.
+     apply IH to H4 H2.
+     apply H9 to H7.
+     search.
+
+% subgoal 5: impl A B   
+     split.
+
+     %   sat P (impl A B) -> sat Q (impl A B)
+     intros.
+     case H5.
+     unfold.
+     intros.   
+     apply IH to H3 H2.
+     apply H9 to H7.
+     apply H6 to H10.
+     apply IH to H4 H2.
+     apply H12 to H11.
+     search.
+
+     % sat Q (impl A B) -> sat P (impl A B) 
+     intros.
+     case H5.
+     unfold.      
+     intros.
+     apply IH to H3 H2.
+     apply H8 to H7.
+     apply H6 to H10.
+     apply IH to H4 H2.
+     apply H13 to H11.
+     search.
+
+% subgoal 6: mat X Y A     
+     split.
+
+     % sat P (mat X Y) -> sat Q (mat X Y)   
+     intros. case H3. search.
+
+     % sat Q (mat X Y) -> sat P (mat X Y)     
+     intros. case H3. search.
+
+% subgoal 7: boxAct X A     
+     split.
+
+     % sat P (boxAct X A) -> sat Q (boxAct X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.   
+     case H2.
+     apply H10 to H6.
+     apply H5 to H13.   
+     apply IH to H3 H14.   
+     apply H17 to H15.
+     search.
+
+     % sat Q (boxAct X A) -> sat P (boxAct X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.
+     case H2.
+     apply H7 to H6.
+     apply IH to H3 H14.
+     apply H5 to H13.
+     apply H16 to H17.
+     search.
+
+% subgoal 9: diaAct X A     
+     split.
+
+     % sat P (diaAct X A) -> sat Q (diaAct X A)     
+     intros.
+     case H4.
+     unfold.
+     case H2.
+     apply H7 to H5.
+     apply IH to H3 H14.
+     apply H15 to H6.
+     search.
+
+     % sat Q (diaAct X A) -> sat P (diaAct X A)     
+     intros.
+     case H4.
+     unfold.   
+     case H2.
+     apply H10 to H5.
+     apply IH to H3 H14.
+     apply H15 to H6.
+     search.
+
+% subgoal 10: boxOut X A     
+     split.
+
+     % sat P (boxOut X A) -> sat Q (boxOut X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.
+     case H2.
+     apply H12 to H6.
+     apply H5 to H13.
+     apply H3 with w = n1.    
+     apply IH to H16 H14.
+     apply H18 to H15.
+     search.
+
+     % sat Q (boxOut X A) -> sat P (boxOut X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.
+     case H2.
+     apply H9 to H6.
+     apply H5 to H13.
+     apply H3 with w = n1.    
+     apply IH to H16 H14.
+     apply H18 to H15.
+     search.
+
+% subogoal 11: diaOut X A     
+     split.
+
+     % sat P (diaOut X A) -> sat Q (diaOut X A)     
+     intros.
+     case H4.
+     unfold.
+     case H2.
+     apply H9 to H5.
+     apply H3 with w = n1.      
+     apply IH to H15 H14.
+     apply H16 to H6.
+     search.
+
+     % sat Q (diaOut X A) -> sat P (diaOut X A)     
+     intros.
+     case H4.
+     unfold.
+     case H2.
+     apply H12 to H5.
+     apply H3 with w = n1.      
+     apply IH to H15 H14.
+     apply H16 to H6.
+     search.
+
+% subgoal 12: boxIn X A     
+     split.
+
+     % sat P (boxIn X A) -> sat Q (boxIn X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.
+     case H2.
+     apply H11 to H6.
+     apply H14 with W = w.
+     apply H3 with w = w.
+     apply IH to H16 H15.
+     apply H5 to H13.
+     apply H19 with w = w.
+     apply H18 to H20.
+     search.
+
+     % sat Q (boxIn X A) -> sat P (boxIn X A)     
+     intros.
+     case H4.
+     unfold.
+     intros.
+     case H2.
+     apply H8 to H6.
+     apply H3 with w = w.
+     apply H14 with W = w.
+     apply IH to H15 H16.
+     apply H5 to H13.
+     apply H19 with w = w.
+     apply H18 to H20.
+     search.
+
+% subgoal 13: diaIn X A     
+     split.
+
+     % sat P (diaIn X A) -> sat Q (diaIn X A)     
+     intros.
+     case H4.
+     unfold.
+     case H2.
+     apply H8 to H5.
+     exists N.
+     split.
+     search.
+     intros.
+     apply H3 with w = w.
+     apply H14 with W = w.
+     apply IH to H15 H16.
+     apply H6 with w = w.
+     apply H17 to H19.
+     search.
+
+     % sat Q (diaIn X A) -> sat P (diaIn X A)     
+     intros.
+     case H4.
+     unfold.
+     case H2.
+     apply H11 to H5.
+     exists M.
+     split.
+     search.
+     intros.
+     apply H3 with w = w.
+     apply H14 with W = w.
+     apply IH to H15 H16.
+     apply H6 with w = w.
+     apply H17 to H19.
+     search.
+%QED
+
+Theorem soundness: forall P Q, bisim P Q -> forall F, form F -> (sat P F -> sat Q F) /\ (sat Q F -> sat P F).
+     intros.
+     apply bisim_sat to H2 H1.
+     search.
+%QED
+
+       
